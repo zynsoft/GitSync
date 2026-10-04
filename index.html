@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<!--
+  GitSync — © 2026 CodeZing (https://youtube.com/@kudosc?si=au2Bagg75VuP_jEr)
+  All rights reserved. Source available for viewing only via the official
+  GitHub repository. No copying, re-hosting, modification-and-redistribution,
+  or resale without written permission. See LICENSE for full terms.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>GitSync — Home</title>
+<meta name="description" content="Sync a local project folder to a GitHub repository in one clean commit.">
+
+<!-- Theme applied before first paint to avoid a flash of the wrong theme -->
+<script>
+(function(){
+  try{
+    var t = localStorage.getItem('gitsync-theme');
+    if(!t){ t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'; }
+    document.documentElement.setAttribute('data-theme', t);
+  }catch(e){}
+})();
+</script>
+
+<link rel="stylesheet" href="style.css">
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#5b7cff" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#4f6bf0" media="(prefers-color-scheme: light)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GitSync">
+<link rel="icon" href="icons/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+</head>
+<body>
+
+<!-- ============ SPLASH / LAUNCH ANIMATION ============ -->
+<div id="app-splash" aria-hidden="true">
+  <div class="splash-glow splash-glow-1"></div>
+  <div class="splash-glow splash-glow-2"></div>
+  <div class="splash-orbit">
+    <span class="splash-ring"></span>
+    <span class="splash-ring splash-ring-2"></span>
+    <span class="splash-mark"><img src="icons/icon-192.png" alt=""></span>
+  </div>
+  <div class="splash-title">GitSync</div>
+  <div class="splash-dots"><span></span><span></span><span></span></div>
+</div>
+
+<!-- ============ AUTH / LOGIN VIEW ============ -->
+<section id="view-auth" class="view active">
+  <div class="auth-glow auth-glow-1"></div>
+  <div class="auth-glow auth-glow-2"></div>
+  <div class="auth-card">
+    <div class="auth-logo"><span class="logo-badge"><img src="icons/icon-96.png" alt=""></span> GitSync</div>
+    <p class="auth-sub">Sync a local project folder to a GitHub repository in one clean commit.</p>
+
+    <label class="field-label" for="pat-input">GitHub Personal Access Token</label>
+    <input id="pat-input" type="password" placeholder="ghp_..." autocomplete="off" spellcheck="false">
+    <p class="hint">Needs the <code>repo</code> scope. Nothing is sent anywhere except GitHub's API.</p>
+
+    <button id="connect-btn" class="btn btn-primary btn-block">Connect to GitHub</button>
+    <p id="auth-error" class="error-text hidden"></p>
+
+    <button id="how-to-token" class="btn-link">How do I get a token?</button>
+
+    <a href="setup.html" class="setup-link-card">
+      <span>📘</span>
+      <span><strong>How to Setup GitSync — step by step</strong><small id="setup-url">setup.html</small></span>
+      <span>›</span>
+    </a>
+    <button id="copy-setup-link" class="btn-link small" type="button">Copy guide link</button>
+  </div>
+</section>
+
+<!-- ============ APP SHELL ============ -->
+<div id="app-shell" class="hidden">
+
+  <header class="navbar">
+    <nav class="navbar-links">
+      <a href="index.html" class="navbar-link active">Home</a>
+      <a href="commits.html" class="navbar-link">Commits</a>
+      <a href="custom.html" class="navbar-link">Custom</a>
+    </nav>
+    <div class="navbar-actions">
+      <button id="settings-toggle" class="icon-btn" title="Settings & Accounts" aria-label="Settings & Accounts">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="19" height="19"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      </button>
+      <a id="profile-btn" href="profile.html" class="icon-btn profile-btn" title="Profile" aria-label="Profile">
+        <img class="profile-btn-img hidden" alt="">
+        <svg class="profile-btn-fallback" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+      </a>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="sidebar">
+      <button class="nav-item active" data-nav="dashboard">Dashboard</button>
+      <a class="nav-item" href="commits.html" style="text-decoration:none">Commits</a>
+      <button class="nav-item" data-nav="howto">How to Use</button>
+      <button class="nav-item" data-nav="settings">Settings</button>
+    </nav>
+
+    <main class="content">
+
+      <!-- ============ DASHBOARD VIEW ============ -->
+      <section id="view-dashboard" class="view active">
+
+        <div class="connected-row flat-row">
+          <span class="dot dot-green"></span>
+          <span>Connected as <strong id="username-label">—</strong></span>
+          <button id="disconnect-btn" class="btn-link small">Disconnect</button>
+        </div>
+
+        <div class="dash-panel">
+          <div class="field-select" id="repo-select-trigger" role="button" tabindex="0" aria-haspopup="listbox">
+            <span class="field-select-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            </span>
+            <div class="field-select-main">
+              <span class="field-select-label">Repository</span>
+              <span class="field-select-value" id="repo-select-value">Loading repositories…</span>
+            </div>
+            <span class="field-select-chevron">⌄</span>
+          </div>
+          <select id="repo-select" class="visually-hidden" aria-hidden="true" tabindex="-1"><option>Loading repositories…</option></select>
+
+          <div class="field-select" id="branch-select-trigger" role="button" tabindex="0" aria-haspopup="listbox">
+            <span class="field-select-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>
+            </span>
+            <div class="field-select-main">
+              <span class="field-select-label">Branch</span>
+              <span class="field-select-value" id="branch-select-value">Select a repository first</span>
+            </div>
+            <span class="field-select-chevron">⌄</span>
+          </div>
+          <select id="branch-select" class="visually-hidden" aria-hidden="true" tabindex="-1"><option>Select a repository first</option></select>
+          <button type="button" id="new-branch-btn" class="btn-link small new-branch-link" disabled>+ Create new branch</button>
+
+          <label class="field-label">Sync Mode</label>
+          <div class="segmented" id="sync-mode-segmented">
+            <label class="segmented-opt"><input type="radio" name="sync-mode" value="repo"><span>Entire repository</span></label>
+            <label class="segmented-opt"><input type="radio" name="sync-mode" value="folder" checked><span>Selected folder only</span></label>
+          </div>
+        </div>
+
+        <div class="upload-hero">
+          <div class="upload-hero-head">
+            <div class="upload-hero-title">Push your code</div>
+            <div class="upload-hero-sub">Choose how you'd like to sync this project</div>
+          </div>
+          <div class="upload-options">
+            <button id="upload-btn" class="upload-option" disabled>
+              <span class="upload-option-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+              </span>
+              <span class="upload-option-text">
+                <span class="upload-option-title">Upload Project Folder</span>
+                <span class="upload-option-sub">Pick a folder straight from your device</span>
+              </span>
+              <span class="upload-option-arrow">›</span>
+            </button>
+            <button id="upload-zip-btn" class="upload-option" disabled>
+              <span class="upload-option-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8"></path><path d="M1 3h22v5H1z"></path><path d="M10 12h4"></path></svg>
+              </span>
+              <span class="upload-option-text">
+                <span class="upload-option-title">Upload ZIP File</span>
+                <span class="upload-option-sub">Extract and sync a .zip archive</span>
+              </span>
+              <span class="upload-option-arrow">›</span>
+            </button>
+            <button id="upload-single-btn" class="upload-option" disabled>
+              <span class="upload-option-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+              </span>
+              <span class="upload-option-text">
+                <span class="upload-option-title">Upload / Change a Single File</span>
+                <span class="upload-option-sub">Add or update just one file in the repo</span>
+              </span>
+              <span class="upload-option-arrow">›</span>
+            </button>
+          </div>
+        </div>
+        <input type="file" id="folder-input" webkitdirectory directory multiple class="hidden">
+        <input type="file" id="files-input" multiple class="hidden" accept=".txt,.md,.markdown,.rst,.json,.jsonc,.js,.mjs,.cjs,.ts,.tsx,.jsx,.vue,.svelte,.py,.pyw,.ipynb,.java,.kt,.kts,.gradle,.c,.h,.cpp,.cc,.hpp,.cs,.go,.rs,.rb,.php,.swift,.dart,.lua,.pl,.r,.scala,.sh,.bash,.zsh,.bat,.cmd,.ps1,.sql,.html,.htm,.css,.scss,.sass,.less,.xml,.yml,.yaml,.toml,.ini,.cfg,.conf,.env,.properties,.lock,.gitignore,.gitattributes,.editorconfig,.dockerfile,.makefile,.csv,.tsv,.log,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.odt,.ods,.rtf,.zip,.rar,.7z,.tar,.gz,.tgz,.bz2,.xz,.apk,.aab,.ipa,.jar,.war,.exe,.msi,.dmg,.deb,.rpm,.bin,.iso,.so,.dll,.png,.jpg,.jpeg,.gif,.webp,.svg,.bmp,.ico,.avif,.heic,.mp3,.wav,.ogg,.m4a,.flac,.aac,.mp4,.mov,.mkv,.webm,.avi,.ttf,.otf,.woff,.woff2,.eot,.wasm,.map,.pem,.key,.crt,.license">
+        <input type="file" id="zip-input" accept=".zip,application/zip" class="hidden">
+        <input type="file" id="single-file-input" class="hidden" accept=".txt,.md,.markdown,.rst,.json,.jsonc,.js,.mjs,.cjs,.ts,.tsx,.jsx,.vue,.svelte,.py,.pyw,.ipynb,.java,.kt,.kts,.gradle,.c,.h,.cpp,.cc,.hpp,.cs,.go,.rs,.rb,.php,.swift,.dart,.lua,.pl,.r,.scala,.sh,.bash,.zsh,.bat,.cmd,.ps1,.sql,.html,.htm,.css,.scss,.sass,.less,.xml,.yml,.yaml,.toml,.ini,.cfg,.conf,.env,.properties,.lock,.gitignore,.gitattributes,.editorconfig,.dockerfile,.makefile,.csv,.tsv,.log,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.odt,.ods,.rtf,.zip,.rar,.7z,.tar,.gz,.tgz,.bz2,.xz,.apk,.aab,.ipa,.jar,.war,.exe,.msi,.dmg,.deb,.rpm,.bin,.iso,.so,.dll,.png,.jpg,.jpeg,.gif,.webp,.svg,.bmp,.ico,.avif,.heic,.mp3,.wav,.ogg,.m4a,.flac,.aac,.mp4,.mov,.mkv,.webm,.avi,.ttf,.otf,.woff,.woff2,.eot,.wasm,.map,.pem,.key,.crt,.license">
+        <button id="fallback-files-btn" class="btn-link small hidden">Folder upload not supported — select files instead</button>
+
+              </section>
+
+      <!-- ============ UPLOAD PROGRESS VIEW ============ -->
+      <section id="view-progress" class="view">
+        <div class="card center-card prog-card">
+          <div class="prog-icon"><span class="prog-icon-ring"></span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+          </div>
+          <div id="progress-label" class="progress-label">Reading project…</div>
+          <div class="progress-track"><div id="progress-bar" class="progress-fill" style="width:0%"></div></div>
+          <div id="progress-percent" class="progress-percent">0%</div>
+          <div id="progress-detail" class="progress-detail"></div>
+          <div class="prog-note">Comparing your files with GitHub. This only reads — nothing is changed yet.</div>
+        </div>
+      </section>
+
+      <!-- ============ ZIP EXTRACTION PROGRESS VIEW ============ -->
+      <section id="view-zip-progress" class="view">
+        <div class="card center-card prog-card">
+          <div class="prog-icon"><span class="prog-icon-ring"></span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8"></path><path d="M1 3h22v5H1z"></path><path d="M10 12h4"></path></svg>
+          </div>
+          <div id="zip-progress-label" class="progress-label">Extracting ZIP file…</div>
+          <div class="progress-track"><div id="zip-progress-bar" class="progress-fill" style="width:0%"></div></div>
+          <div id="zip-progress-percent" class="progress-percent">0%</div>
+          <div id="zip-progress-detail" class="progress-detail"></div>
+          <div class="prog-note">Unpacking your ZIP on this device. Nothing is uploaded yet.</div>
+        </div>
+      </section>
+
+      <!-- ============ COMPARE VIEW ============ -->
+      <section id="view-compare" class="view">
+        <div class="page-header cmp-header">
+          <button id="compare-back-btn" class="icon-btn back-btn" aria-label="Cancel and go back" title="Cancel">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          </button>
+          <div class="page-header-title">
+            <div class="page-header-title-main">Review changes</div>
+            <div class="page-header-title-sub" id="cmp-sub">—</div>
+          </div>
+        </div>
+
+        <div class="cmp-hero">
+          <div class="cmp-hero-top">
+            <div class="cmp-hero-total"><b id="cmp-total">0</b><span id="cmp-total-label">files will change</span></div>
+            <div class="cmp-hero-unchanged"><b id="count-unchanged">0</b><span>already up to date</span></div>
+          </div>
+          <div class="cmp-bar" id="cmp-bar" aria-hidden="true"><i class="a"></i><i class="m"></i><i class="d"></i></div>
+          <div class="cmp-stats">
+            <div class="cmp-stat added"><span class="cmp-stat-ico">+</span><b id="count-added">0</b><span>Added</span></div>
+            <div class="cmp-stat modified"><span class="cmp-stat-ico">~</span><b id="count-modified">0</b><span>Modified</span></div>
+            <div class="cmp-stat deleted"><span class="cmp-stat-ico">−</span><b id="count-deleted">0</b><span>Deleted</span></div>
+          </div>
+        </div>
+
+        <div class="filter-row">
+          <div class="chip-group" id="filter-chips">
+            <button class="chip active" data-filter="all">All <em id="chip-all">0</em></button>
+            <button class="chip" data-filter="added">Added <em id="chip-added">0</em></button>
+            <button class="chip" data-filter="modified">Modified <em id="chip-modified">0</em></button>
+            <button class="chip" data-filter="deleted">Deleted <em id="chip-deleted">0</em></button>
+          </div>
+          <input type="text" id="file-search" placeholder="Search changed files…" autocomplete="off" spellcheck="false">
+        </div>
+
+        <div id="deletions-warning" class="card warning-card hidden">
+          <div class="warn-head"><span class="warn-ico">!</span><div><div class="warn-title">Files that will be deleted</div><div class="warn-sub">These exist on GitHub but not in your upload.</div></div></div>
+          <div id="deletions-list"></div>
+          <label class="checkbox-row">
+            <input type="checkbox" id="confirm-deletions">
+            <span>I confirm these files should be removed from the repository</span>
+          </label>
+        </div>
+
+        <div id="file-list" class="file-list"></div>
+
+        <div class="sticky-action">
+          <button id="review-continue-btn" class="btn btn-primary btn-block">Review &amp; Commit</button>
+        </div>
+      </section>
+
+      <!-- ============ COMMIT VIEW ============ -->
+      <section id="view-commit" class="view">
+        <div class="cmp-hero commit-hero">
+          <div class="cmp-hero-top">
+            <div class="cmp-hero-total"><b id="commit-total">0</b><span>files ready to commit</span></div>
+          </div>
+          <div id="commit-file-count" class="hidden"></div>
+          <div class="summary-counts">
+            <span class="count added" id="commit-count-added">0 Added</span>
+            <span class="count modified" id="commit-count-modified">0 Modified</span>
+            <span class="count deleted" id="commit-count-deleted">0 Deleted</span>
+          </div>
+          <div class="commit-target" id="commit-target"></div>
+        </div>
+
+        <div class="card">
+          <label class="field-label" for="commit-message" style="margin-top:0">Commit message</label>
+          <input type="text" id="commit-message" placeholder="Describe your changes" autocomplete="off">
+          <p class="hint">All files go up together as one clean commit.</p>
+        </div>
+
+        <p id="commit-error" class="error-text hidden"></p>
+
+        <div class="sticky-action two-btn">
+          <button id="cancel-commit-btn" class="btn btn-secondary">Back</button>
+          <button id="commit-btn" class="btn btn-primary">Commit Everything</button>
+        </div>
+      </section>
+
+      <!-- ============ SYNC RESULTS VIEW (live upload) ============ -->
+      <section id="view-sync-results" class="view">
+        <div class="sr-hero" id="sr-hero" data-state="running">
+          <div class="sr-ring" id="sr-ring" style="--p:0"><div class="sr-ring-in"><span id="sr-pct">0%</span></div></div>
+          <div class="sr-hero-text">
+            <div class="sr-title" id="sr-title">Uploading to GitHub…</div>
+            <div class="sr-sub" id="sr-sub">Keep this screen open until it finishes.</div>
+            <div class="summary-counts">
+              <span class="count added" id="results-count-success">0 Succeeded</span>
+              <span class="count deleted" id="results-count-failed">0 Failed</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="sync-results-banner" class="sr-banner hidden"></div>
+
+        <div id="sync-results-list" class="file-list"></div>
+
+        <div class="sticky-action two-btn">
+          <button id="results-back-btn" class="btn btn-secondary">Back to Dashboard</button>
+          <button id="results-retry-btn" class="btn btn-primary hidden">Try Again</button>
+        </div>
+      </section>
+
+      <!-- ============ SUCCESS VIEW (full-screen) ============ -->
+      <section id="view-success" class="view view-success-full">
+        <div class="success-hero">
+          <div class="success-confetti" id="success-confetti" aria-hidden="true"></div>
+          <div class="success-hero-badge">
+            <svg class="success-tick" viewBox="0 0 52 52" aria-hidden="true"><path d="M14 27l8 8 16-17"/></svg>
+          </div>
+          <div class="success-hero-title">Pushed successfully</div>
+          <div id="success-message" class="success-hero-msg">—</div>
+          <div class="success-hero-chips">
+            <span class="s-chip" id="success-repo-chip">—</span>
+            <span class="s-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg><span id="success-branch">—</span></span>
+            <button type="button" class="s-chip s-chip-btn" id="success-sha-btn" title="Copy commit hash"><code id="success-sha">—</code></button>
+          </div>
+        </div>
+
+        <div class="success-stats" id="success-stats">
+          <div class="ss added"><b id="success-added">0</b><span>Added</span></div>
+          <div class="ss modified"><b id="success-modified">0</b><span>Modified</span></div>
+          <div class="ss deleted"><b id="success-deleted">0</b><span>Deleted</span></div>
+        </div>
+        <span id="success-file-count" class="hidden">—</span>
+
+        <div class="sync-status-block">
+          <div class="sync-status-row">
+            <span class="sync-status-icon done">✓</span>
+            <span class="sync-status-text">
+              <span class="sync-status-title">Sent from GitSync</span>
+              <span class="sync-status-sub">Every file uploaded without error and the commit was created.</span>
+            </span>
+          </div>
+          <div class="sync-status-row" id="success-verify-row">
+            <span class="sync-status-icon pending" id="success-verify-icon"><span class="spinner"></span></span>
+            <span class="sync-status-text">
+              <span class="sync-status-title" id="success-verify-title">Confirming on GitHub…</span>
+              <span class="sync-status-sub" id="success-verify-sub">GitHub can take a few seconds to reflect a brand-new push. Open the Commits page any time to check the exact live state.</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="success-files-section">
+          <div class="success-files-head">Files in this commit</div>
+          <div id="success-files-list" class="success-files-list"></div>
+        </div>
+
+        <div class="success-actions">
+          <button id="back-to-dashboard-btn" class="btn btn-primary btn-block">Back to Dashboard</button>
+          <a id="view-on-github-btn" class="btn btn-secondary btn-block" href="#" target="_blank" rel="noopener">View on GitHub.com</a>
+          <a id="view-live-from-success-btn" class="btn btn-secondary btn-block" href="commits.html">Open Commits Page</a>
+        </div>
+      </section>
+
+      <!-- ============ CONFLICT VIEW ============ -->
+      <section id="view-conflict" class="view">
+        <div class="card center-card">
+          <div class="conflict-icon">⚠</div>
+          <div class="success-title">Repository changed</div>
+          <p>Someone pushed new changes to this branch while you were preparing your upload.</p>
+          <p>Refresh the repository and compare the files again.</p>
+          <button id="conflict-back-btn" class="btn btn-primary btn-block">Back to Dashboard</button>
+        </div>
+      </section>
+
+      <!-- ============ SETTINGS VIEW ============ -->
+      <section id="view-settings" class="view">
+
+        <div class="page-header">
+          <button id="settings-back-btn" class="icon-btn back-btn" aria-label="Back to home" title="Back to home">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          </button>
+          <div class="page-header-title">
+            <div class="page-header-title-main">Settings</div>
+          </div>
+        </div>
+
+        <button type="button" class="howto-link-row" id="settings-howto-link">
+          <span class="howto-link-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          </span>
+          <span class="howto-link-text">
+            <span class="howto-link-title">How to Use GitSync</span>
+            <span class="howto-link-sub">Get a GitHub token & walk through every feature, step by step</span>
+          </span>
+          <span class="last-commit-chevron">›</span>
+        </button>
+
+        <a href="edit-profile.html" class="howto-link-row" id="settings-edit-profile-link">
+          <span class="howto-link-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          </span>
+          <span class="howto-link-text">
+            <span class="howto-link-title">Edit Profile</span>
+            <span class="howto-link-sub">Change your name, bio, links and more — right here</span>
+          </span>
+          <span class="last-commit-chevron">›</span>
+        </a>
+
+        <div class="settings-divider"></div>
+
+        <div class="settings-section">
+          <div class="settings-section-head">
+            <span class="settings-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            </span>
+            <div>
+              <div class="settings-section-title">Connected Accounts</div>
+              <div class="settings-section-sub">Switch instantly between GitHub accounts</div>
+            </div>
+          </div>
+          <div id="accounts-list"></div>
+          <div class="add-account-row">
+            <input type="password" id="add-account-token" placeholder="Paste another GitHub token…" autocomplete="off">
+            <button id="add-account-btn" class="btn btn-secondary">Add Account</button>
+          </div>
+          <p id="add-account-error" class="error-text hidden"></p>
+          <p class="hint">Tokens are stored in this browser only. Remove any account at any time.</p>
+        </div>
+
+        <div class="settings-divider"></div>
+
+        <div class="settings-section">
+          <div class="settings-section-head">
+            <span class="settings-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+            </span>
+            <div>
+              <div class="settings-section-title">Sync Defaults</div>
+              <div class="settings-section-sub">Applied the next time you open the dashboard</div>
+            </div>
+          </div>
+
+          <label class="field-label">Default Repository</label>
+          <div id="settings-default-repo" class="static-value">—</div>
+
+          <label class="field-label">Default Branch</label>
+          <div id="settings-default-branch" class="static-value">—</div>
+
+          <label class="field-label">Sync Mode</label>
+          <div class="segmented settings-radio-row">
+            <label class="segmented-opt"><input type="radio" name="settings-sync-mode" value="repo"><span>Entire repository</span></label>
+            <label class="segmented-opt"><input type="radio" name="settings-sync-mode" value="folder"><span>Selected folder only</span></label>
+          </div>
+        </div>
+
+        <div class="settings-divider"></div>
+
+        <div class="settings-section">
+          <div class="settings-section-head">
+            <span class="settings-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path></svg>
+            </span>
+            <div>
+              <div class="settings-section-title">Appearance</div>
+              <div class="settings-section-sub">Applies everywhere in the app, instantly</div>
+            </div>
+          </div>
+
+          <div class="theme-switch" id="settings-theme-switch">
+            <button type="button" class="theme-switch-opt" data-theme-choice="light">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path></svg>
+              <span>Light</span>
+            </button>
+            <button type="button" class="theme-switch-opt" data-theme-choice="dark">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+              <span>Dark</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="settings-divider"></div>
+
+        <div class="settings-section">
+          <div class="settings-section-head">
+            <span class="settings-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+            </span>
+            <div>
+              <div class="settings-section-title">Support the Creator</div>
+              <div class="settings-section-sub">GitSync is built and maintained independently</div>
+            </div>
+          </div>
+
+          <a href="https://youtube.com/@kudosc?si=au2Bagg75VuP_jEr" target="_blank" rel="noopener" class="youtube-support-card">
+            <span class="youtube-support-icon">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4L15.8 12l-6.2 3.6z"/></svg>
+            </span>
+            <span class="youtube-support-text">
+              <span class="youtube-support-title">Subscribe on YouTube</span>
+              <span class="youtube-support-sub">More apps &amp; tutorials from the creator of GitSync</span>
+            </span>
+            <span class="youtube-support-arrow">↗</span>
+          </a>
+          <p class="hint">Enjoying GitSync? A subscribe goes a long way and costs nothing.</p>
+        </div>
+
+        <div class="settings-divider"></div>
+
+        <div class="settings-section">
+          <div class="settings-section-head">
+            <span class="settings-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            </span>
+            <div>
+              <div class="settings-section-title">About &amp; License</div>
+              <div class="settings-section-sub">GitSync © 2026 CodeZing — All rights reserved</div>
+            </div>
+          </div>
+          <p class="hint">
+            This app was created by <strong>CodeZing</strong>
+            (<a href="https://youtube.com/@kudosc?si=au2Bagg75VuP_jEr" target="_blank" rel="noopener">youtube.com/@kudosc</a>).
+            Viewing and sharing this project is welcome — but only via its official GitHub repository link.
+            Copying, re-uploading, modifying and redistributing, or selling this code elsewhere is not permitted.
+            See the <code>LICENSE</code> file in the repository for the full terms.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============ HOW TO USE VIEW ============ -->
+      <section id="view-howto" class="view">
+
+        <div class="page-header">
+          <button id="howto-back-btn" class="icon-btn back-btn" aria-label="Back to home" title="Back">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          </button>
+          <div class="page-header-title">
+            <div class="page-header-title-main">How to Use GitSync</div>
+            <div class="page-header-title-sub">Everything from getting a token to your first push</div>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-section-head">
+            <span class="settings-icon howto-icon-1">1</span>
+            <div>
+              <div class="settings-section-title">Get a GitHub Personal Access Token</div>
+              <div class="settings-section-sub">One-time setup — takes about a minute</div>
+            </div>
+          </div>
+          <ol class="howto-steps">
+            <li><span class="howto-step-num">1</span><span class="howto-step-body">Open <strong>github.com</strong> in a browser and sign in.</span></li>
+            <li><span class="howto-step-num">2</span><span class="howto-step-body">Tap your profile photo in the top-right corner, then tap <strong>Settings</strong>.</span></li>
+            <li><span class="howto-step-num">3</span><span class="howto-step-body">Scroll all the way down the left sidebar and tap <strong>Developer settings</strong>.</span></li>
+            <li><span class="howto-step-num">4</span><span class="howto-step-body">Tap <strong>Personal access tokens</strong> → <strong>Tokens (classic)</strong>.</span></li>
+            <li><span class="howto-step-num">5</span><span class="howto-step-body">Tap <strong>Generate new token</strong> → <strong>Generate new token (classic)</strong>.</span></li>
+            <li><span class="howto-step-num">6</span><span class="howto-step-body">Give it a name like "GitSync" and pick an expiry.</span></li>
+            <li><span class="howto-step-num">7</span><span class="howto-step-body">Under <strong>Select scopes</strong>, check the box for <strong>repo</strong> — this covers reading, writing and creating repositories.</span></li>
+            <li><span class="howto-step-num">8</span><span class="howto-step-body">Scroll down and tap <strong>Generate token</strong>.</span></li>
+            <li><span class="howto-step-num">9</span><span class="howto-step-body">Copy the token right away — GitHub only shows it to you once.</span></li>
+          </ol>
+          <div class="howto-tip">
+            <strong>Using a "Fine-grained" token instead?</strong> Set <strong>Repository access</strong> to <strong>All repositories</strong> (not "Only select repositories") and give it <strong>Contents: Read and write</strong> permission. Otherwise a repository you create inside GitSync won't be covered by the token yet, and uploads to it will fail.
+          </div>
+          <a href="setup.html" class="btn btn-primary btn-block" style="margin-bottom:10px">Open the step-by-step Setup guide</a>
+          <button type="button" id="howto-open-token-page" class="btn btn-secondary btn-block" style="margin-top:14px">Open GitHub's Token Page</button>
+        </div>
+
+        <div class="settings-divider"></div>
+
+        <div class="settings-section">
+          <div class="settings-section-head">
+            <span class="settings-icon howto-icon-2">2</span>
+            <div>
+              <div class="settings-section-title">Connect Your Account</div>
+            </div>
+          </div>
+          <ol class="howto-steps">
+            <li><span class="howto-step-num">1</span><span class="howto-step-body">Paste the token into the <strong>GitHub Personal Access Token</strong> field on the sign-in screen.</span></li>
+            <li><span class="howto-step-num">2</span><span class="howto-step-body">Tap <strong>Connect to GitHub</strong>.</span></li>
+          </ol>
+          <p class="hint">GitSync remembers this on your device, so you won't be asked to paste it again unless you disconnect. Add more accounts any time from Settings → Connected Accounts.</p>
+        </div>
+
+        <div class="settings-divider"></div>
+
+        <div class="settings-section">
+          <div class="settings-section-head">
+            <span class="settings-icon howto-icon-3">3</span>
+            <div>
+              <div class="settings-section-title">Pick a Repository &amp; Branch</div>
+            </div>
+          </div>
+          <ol class="howto-steps">
+            <li><span class="howto-step-num">1</span><span class="howto-step-body">Tap the <strong>Repository</strong> field, search or scroll, then tap one to select it.</span></li>
+            <li><span class="howto-step-num">2</span><span class="howto-step-body">Tap the <strong>Branch</strong> field the same way to switch branches.</span></li>
+            <li><span class="howto-step-num">3</span><span class="howto-step-body">Tap <strong>+ Create new branch</strong> under the Branch field to make a new branch off the current one, right from the dashboard.</span></li>
+          </ol>
+        </div>
+
+        <div class="settings-divider"></div>
+
+        <div class="settings-section">
+          <div class="settings-section-head">
+            <span class="settings-icon howto-icon-4">4</span>
+            <div>
+              <div class="settings-section-title">Push Your Code</div>
+            </div>
+          </div>
+          <ol class="howto-steps">
+            <li><span class="howto-step-num">1</span><span class="howto-step-body">Pick <strong>Upload Project Folder</strong>, <strong>Upload ZIP File</strong>, or <strong>Upload / Change a Single File</strong>.</span></li>
+            <li><span class="howto-step-num">2</span><span class="howto-step-body">Review what changed on the Compare screen — added, modified and deleted files are labeled clearly. Tap any file to preview its diff.</span></li>
+            <li><span class="howto-step-num">3</span><span class="howto-step-body">Tap <strong>Review &amp; Commit</strong>, write a commit message, then tap <strong>Commit Everything</strong>.</span></li>
+          </ol>
+          <p class="hint">"Selected folder only" leaves files outside what you uploaded untouched. "Entire repository" mirrors the repo exactly, deleting anything not in your upload — use it with care.</p>
+        </div>
+
+        <div class="settings-divider"></div>
+
+        <div class="settings-section">
+          <div class="settings-section-head">
+            <span class="settings-icon howto-icon-5">5</span>
+            <div>
+              <div class="settings-section-title">Create a Brand-New Repository</div>
+            </div>
+          </div>
+          <ol class="howto-steps">
+            <li><span class="howto-step-num">1</span><span class="howto-step-body">Open the <strong>Custom</strong> tab at the top of the app.</span></li>
+            <li><span class="howto-step-num">2</span><span class="howto-step-body">Enter a repository name, choose Public or Private, and optionally attach a project ZIP to seed it with files right away.</span></li>
+            <li><span class="howto-step-num">3</span><span class="howto-step-body">Tap <strong>Create Repository</strong>. If the initial upload ever fails, tap <strong>Retry Upload</strong> — the repository is already created, so this just tries the push again.</span></li>
+          </ol>
+        </div>
+
+        <div class="settings-divider"></div>
+
+        <div class="settings-section">
+          <div class="settings-section-head">
+            <span class="settings-icon howto-icon-6">6</span>
+            <div>
+              <div class="settings-section-title">Everything Else</div>
+            </div>
+          </div>
+          <ol class="howto-steps">
+            <li><span class="howto-step-num">•</span><span class="howto-step-body">Open the <strong>Commits</strong> tab in the top bar to see <strong>App Commit</strong> (what GitSync last pushed) and <strong>Live GitHub Commit</strong> (the exact, real-time state of the branch). Tap <strong>Live GitHub Commit</strong> any time to fetch it fresh and see which files matched, which GitHub hasn't reflected yet, and which failed and need reuploading.</span></li>
+            <li><span class="howto-step-num">•</span><span class="howto-step-body">On the Commits page, tap <strong>View last 5 commits</strong> for full history — added, modified and deleted files, with +/- counts, for each of the last 5 commits.</span></li>
+            <li><span class="howto-step-num">•</span><span class="howto-step-body">In the <strong>Custom</strong> tab, tap <strong>Browse Files</strong> on any repository to view, edit or delete individual files.</span></li>
+            <li><span class="howto-step-num">•</span><span class="howto-step-body">Tap <strong>Publish</strong> on a public repository to host it live with GitHub Pages.</span></li>
+            <li><span class="howto-step-num">•</span><span class="howto-step-body">Switch between GitHub accounts any time from <strong>Settings → Connected Accounts</strong>.</span></li>
+          </ol>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="app-footer">
+    GitSync © 2026 <strong>CodeZing</strong> ·
+    <a href="https://youtube.com/@kudosc?si=au2Bagg75VuP_jEr" target="_blank" rel="noopener">youtube.com/@kudosc</a>
+    · All rights reserved. Not for redistribution or resale.
+  </footer>
+</div><!-- /app-shell -->
+
+<!-- New branch modal -->
+<div id="new-branch-modal" class="modal hidden">
+  <div class="modal-sheet small-sheet">
+    <div class="modal-header"><span>Create New Branch</span><button id="new-branch-modal-close" class="icon-btn">✕</button></div>
+    <div class="modal-body" style="padding:0 18px 4px">
+      <p class="hint" id="new-branch-base-hint" style="margin:0 0 12px">Branching off —</p>
+      <label class="field-label" for="new-branch-name-input" style="margin-top:0">Branch name</label>
+      <input type="text" id="new-branch-name-input" placeholder="feature/my-change" autocomplete="off" spellcheck="false">
+      <p id="new-branch-error" class="error-text hidden"></p>
+    </div>
+    <div class="modal-actions">
+      <button id="new-branch-cancel-btn" class="btn btn-secondary">Cancel</button>
+      <button id="new-branch-create-btn" class="btn btn-primary">Create Branch</button>
+    </div>
+  </div>
+</div>
+
+<!-- Picker sheet: custom, in-app popup for Repository/Branch selection —
+     replaces the OS/browser native <select> dropdown with something that
+     matches the rest of the app and opens reliably on the first tap. -->
+<div id="picker-sheet" class="modal hidden">
+  <div class="modal-sheet picker-modal-sheet">
+    <div class="modal-header">
+      <span id="picker-sheet-title">Select</span>
+      <button id="picker-sheet-close" class="icon-btn" aria-label="Close">✕</button>
+    </div>
+    <div class="picker-search-wrap">
+      <input type="text" id="picker-search" placeholder="Search…" autocomplete="off" spellcheck="false">
+    </div>
+    <div id="picker-list" class="picker-list" role="listbox"></div>
+  </div>
+</div>
+
+<!-- Diff modal (full-screen sheet on mobile) -->
+<div id="diff-modal" class="modal hidden">
+  <div class="modal-sheet">
+    <div class="modal-header">
+      <span id="diff-modal-title">Diff</span>
+      <button id="diff-modal-close" class="icon-btn">✕</button>
+    </div>
+    <div id="diff-modal-body" class="modal-body"></div>
+  </div>
+</div>
+
+<!-- Generic confirm modal (replaces window.confirm for a consistent look) -->
+<div id="confirm-modal" class="modal hidden">
+  <div class="modal-sheet small-sheet">
+    <div class="modal-header"><span id="confirm-modal-title">Are you sure?</span></div>
+    <div class="modal-body" style="padding:0 16px 16px"><p id="confirm-modal-message"></p></div>
+    <div class="modal-actions">
+      <button id="confirm-modal-cancel" class="btn btn-secondary">Cancel</button>
+      <button id="confirm-modal-ok" class="btn btn-danger">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<!-- JSZip: the one third-party utility used, purely for reading .zip archives
+     client-side. Loaded from a pinned version on cdnjs; everything else in
+     this app remains hand-written vanilla JS. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="js/offline.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/github.js"></script>
+<script src="js/applog.js"></script>
+<script src="js/files.js"></script>
+<script src="js/zip.js"></script>
+<script src="js/compare.js"></script>
+<script src="js/commit.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/picker.js"></script>
+<script src="js/accounts.js"></script>
+<script src="js/app.js"></script>
+<script src="js/navprofile.js"></script>
+<script src="js/theme.js"></script>
+<script>
+(function(){
+  var url = new URL('setup.html', location.href).href;
+  var label = document.getElementById('setup-url'); if (label) label.textContent = url;
+  var btn = document.getElementById('copy-setup-link');
+  if (btn) btn.addEventListener('click', function(){
+    if (navigator.clipboard) navigator.clipboard.writeText(url);
+    btn.textContent = 'Link copied ✓';
+    setTimeout(function(){ btn.textContent = 'Copy guide link'; }, 1600);
+  });
+})();
+</script>
+</body>
+</html>

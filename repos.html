@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<!--
+  GitSync — © 2026 CodeZing (https://youtube.com/@kudosc?si=au2Bagg75VuP_jEr)
+  All rights reserved. Source available for viewing only via the official
+  GitHub repository. No copying, re-hosting, modification-and-redistribution,
+  or resale without written permission. See LICENSE for full terms.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>GitSync — All Repositories</title>
+<meta name="description" content="Every repository on your GitHub account — browse, publish, manage files or delete.">
+
+<!-- Theme applied before first paint to avoid a flash of the wrong theme -->
+<script>
+(function(){
+  try{
+    var t = localStorage.getItem('gitsync-theme');
+    if(!t){ t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'; }
+    document.documentElement.setAttribute('data-theme', t);
+  }catch(e){}
+})();
+</script>
+
+<link rel="stylesheet" href="style.css">
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#5b7cff" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#4f6bf0" media="(prefers-color-scheme: light)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GitSync">
+<link rel="icon" href="icons/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+</head>
+<body class="repos-page">
+
+<div id="app-shell">
+
+  <header class="navbar">
+    <nav class="navbar-links">
+      <a href="index.html" class="navbar-link">Home</a>
+      <a href="commits.html" class="navbar-link">Commits</a>
+      <a href="custom.html" class="navbar-link active">Custom</a>
+    </nav>
+    <div class="navbar-actions">
+      <button id="accounts-toggle" class="icon-btn" title="Accounts" aria-label="Accounts">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="19" height="19"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      </button>
+      <a id="profile-btn" href="profile.html" class="icon-btn profile-btn" title="Profile" aria-label="Profile">
+        <img class="profile-btn-img hidden" alt="">
+        <svg class="profile-btn-fallback" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+      </a>
+    </div>
+  </header>
+
+  <!-- ============ NOT CONNECTED STATE ============ -->
+  <div id="custom-not-connected" class="hidden">
+    <div class="content custom-content">
+      <div class="card center-card">
+        <div class="conflict-icon">🔒</div>
+        <div class="success-title">Connect a GitHub account first</div>
+        <p class="hint">Head to the Home page to connect with a Personal Access Token, then come back here.</p>
+        <a href="index.html" class="btn btn-primary btn-block">Go to Home</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ ALL REPOSITORIES ============ -->
+  <div id="custom-connected" class="hidden">
+    <div class="content custom-content">
+
+      <div class="page-header repos-header">
+        <a href="custom.html" class="icon-btn back-btn" aria-label="Back to Custom" title="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg></a>
+        <div class="page-header-title">
+          <div class="page-header-title-main">All Repositories</div>
+          <div class="page-header-title-sub" id="custom-repo-count">Loading…</div>
+        </div>
+        <div class="connected-row flat-row repos-connected">
+          <span class="dot dot-green"></span>
+          <span>Connected as <strong id="custom-username-label">—</strong></span>
+        </div>
+      </div>
+
+      <input type="text" id="custom-repo-search" class="repos-search" placeholder="Search repositories…" autocomplete="off">
+      <div id="custom-repo-list" class="file-list repo-grid"></div>
+
+      <div class="hidden" id="repo-browser-card">
+        <div class="page-header">
+          <button id="repo-browser-close" class="icon-btn back-btn" aria-label="Back to repositories" title="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg></button>
+          <div class="page-header-title">
+            <div class="page-header-title-main" id="repo-browser-title">Files</div>
+            <div class="page-header-title-sub">Manage files &amp; repository settings</div>
+          </div>
+        </div>
+
+        <div class="box-card">
+          <div class="settings-section-head"><span class="settings-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg></span><div><div class="settings-section-title">Files</div><div class="settings-section-sub">Tap a file to view, edit or delete it</div></div></div>
+          <div id="repo-file-stats" class="fb-stats"></div>
+          <div class="fb-toolbar">
+            <input type="text" id="repo-file-search" placeholder="Search files…" autocomplete="off">
+            <div class="chip-group" id="repo-file-sort">
+              <button class="chip active" data-sort="size">Biggest first</button>
+              <button class="chip" data-sort="name">Name</button>
+              <button class="chip" data-sort="type">Type</button>
+            </div>
+          </div>
+          <div id="repo-file-list" class="file-list fb-list"></div>
+        </div>
+
+        <div class="box-card">
+          <div class="settings-section-head"><span class="settings-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"></path></svg></span><div><div class="settings-section-title">Rename repository</div><div class="settings-section-sub">Give this repository a new name</div></div></div>
+          <label class="field-label" for="rename-repo-input">New name</label>
+          <input type="text" id="rename-repo-input" autocomplete="off" autocapitalize="off" spellcheck="false">
+          <p class="hint">Letters, numbers, dashes, dots and underscores only. GitHub redirects the old address, but links like GitHub Pages URLs will change.</p>
+          <button id="rename-repo-btn" class="btn btn-secondary btn-block" style="margin-top:12px">Rename Repository</button>
+        </div>
+
+        <div class="box-card danger-zone">
+          <div class="settings-section-head"><span class="settings-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path></svg></span><div><div class="settings-section-title">Danger zone</div><div class="settings-section-sub">This cannot be undone</div></div></div>
+          <button id="delete-repo-btn" class="btn btn-secondary btn-block danger-outline">Delete Repository</button>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /custom-connected -->
+
+  <footer class="app-footer">
+    GitSync © 2026 <strong>CodeZing</strong> ·
+    <a href="https://youtube.com/@kudosc?si=au2Bagg75VuP_jEr" target="_blank" rel="noopener">youtube.com/@kudosc</a>
+    · All rights reserved. Not for redistribution or resale.
+  </footer>
+
+</div><!-- /app-shell -->
+
+<!-- File viewer / editor modal -->
+<div id="file-editor-modal" class="modal hidden">
+  <div class="modal-sheet">
+    <div class="modal-header">
+      <span id="file-editor-title">File</span>
+      <button id="file-editor-close" class="icon-btn">✕</button>
+    </div>
+    <div id="file-editor-body" class="modal-body file-editor-body"></div>
+    <div id="file-editor-actions" class="modal-actions hidden">
+      <button id="file-editor-cancel" class="btn btn-secondary">Cancel</button>
+      <button id="file-editor-save" class="btn btn-primary">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete-repository modal: requires typing the repo name to confirm -->
+<div id="delete-repo-modal" class="modal hidden">
+  <div class="modal-sheet small-sheet">
+    <div class="modal-header">
+      <span>Delete Repository</span>
+      <button id="delete-repo-modal-close" class="icon-btn">✕</button>
+    </div>
+    <div class="modal-body" style="padding:0 16px 16px">
+      <p>This will permanently delete <strong id="delete-repo-modal-name">—</strong> and everything in it. This action <strong>cannot be undone</strong>.</p>
+      <label class="field-label">Type the repository name to confirm</label>
+      <input type="text" id="delete-repo-confirm-input" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="modal-actions">
+      <button id="delete-repo-cancel-btn" class="btn btn-secondary">Cancel</button>
+      <button id="delete-repo-confirm-btn" class="btn btn-danger" disabled>Delete Repository</button>
+    </div>
+  </div>
+</div>
+
+<!-- Generic confirm modal (replaces window.confirm for a consistent look) -->
+<div id="confirm-modal" class="modal hidden">
+  <div class="modal-sheet small-sheet">
+    <div class="modal-header"><span id="confirm-modal-title">Are you sure?</span></div>
+    <div class="modal-body" style="padding:0 16px 16px"><p id="confirm-modal-message"></p></div>
+    <div class="modal-actions">
+      <button id="confirm-modal-cancel" class="btn btn-secondary">Cancel</button>
+      <button id="confirm-modal-ok" class="btn btn-danger">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Accounts modal (account switcher) -->
+<div id="accounts-modal" class="modal hidden">
+  <div class="modal-sheet small-sheet">
+    <div class="modal-header">
+      <span>Connected Accounts</span>
+      <button id="accounts-modal-close" class="icon-btn">✕</button>
+    </div>
+    <div class="modal-body" style="padding:0 16px 16px">
+      <div id="accounts-list"></div>
+      <div class="add-account-row">
+        <input type="password" id="add-account-token" placeholder="Paste another GitHub token…" autocomplete="off">
+        <button id="add-account-btn" class="btn btn-secondary">Add Account</button>
+      </div>
+      <p id="add-account-error" class="error-text hidden"></p>
+      <p class="hint">Tokens are stored in this browser only, so you can switch accounts instantly.</p>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="js/offline.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/github.js"></script>
+<script src="js/files.js"></script>
+<script src="js/zip.js"></script>
+<script src="js/compare.js"></script>
+<script src="js/commit.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/accounts.js"></script>
+<script src="js/upload-ui.js"></script>
+<script src="js/custom.js"></script>
+<script src="js/navprofile.js"></script>
+<script src="js/theme.js"></script>
+</body>
+</html>
