@@ -14,7 +14,7 @@ no build step.
 © 2026 CodeZing. All rights reserved.
 
 - **Official source:** this repository only —
-  `[ADD YOUR GITHUB REPOSITORY URL HERE]`
+  https://github.com/zynsoft/GitSync
 - **Sharing:** please share this project by linking directly to the
   official repository above, not by re-uploading or mirroring it elsewhere.
 - **Not permitted without written permission:** copying/re-hosting this
